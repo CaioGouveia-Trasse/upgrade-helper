@@ -25,25 +25,45 @@ export const useFetchDiff = ({
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [isDone, setIsDone] = useState<boolean>(false)
   const [diff, setDiff] = useState<File[]>([])
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchDiff = async () => {
       setIsLoading(true)
       setIsDone(false)
+      setError(null)
 
-      const [response] = await Promise.all([
-        fetch(getDiffURL({ packageName, language, fromVersion, toVersion })),
-        delay(300),
-      ])
+      try {
+        const diffURL = getDiffURL({ packageName, language, fromVersion, toVersion })
 
-      const diff = await response.text()
+        const [response] = await Promise.all([
+          fetch(diffURL),
+          delay(300),
+        ])
 
-      setDiff(movePackageJsonToTop(parseDiff(diff)))
+        if (!response.ok) {
+          const errorMessage = `Failed to fetch diff: ${response.status} ${response.statusText}`
+          console.error(errorMessage)
+          console.error('URL:', diffURL)
+          setError(errorMessage)
+          setIsLoading(false)
+          setIsDone(true)
+          return
+        }
 
-      setIsLoading(false)
-      setIsDone(true)
+        const diffText = await response.text()
 
-      return
+        setDiff(movePackageJsonToTop(parseDiff(diffText)))
+
+        setIsLoading(false)
+        setIsDone(true)
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred'
+        console.error('Error fetching diff:', errorMessage)
+        setError(errorMessage)
+        setIsLoading(false)
+        setIsDone(true)
+      }
     }
 
     if (shouldShowDiff) {
@@ -55,5 +75,6 @@ export const useFetchDiff = ({
     isLoading,
     isDone,
     diff,
+    error,
   }
 }

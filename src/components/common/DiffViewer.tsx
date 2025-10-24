@@ -84,7 +84,7 @@ const DiffViewer = ({
   appName,
   appPackage,
 }: DiffViewerProps) => {
-  const { isLoading, isDone, diff } = useFetchDiff({
+  const { isLoading, isDone, diff, error } = useFetchDiff({
     shouldShowDiff,
     packageName,
     language,
@@ -188,6 +188,20 @@ const DiffViewer = ({
         <AnimatePresence>
           <DiffLoading />
         </AnimatePresence>
+      </Container>
+    )
+  }
+
+  if (error) {
+    return (
+      <Container>
+        <Alert
+          style={{ marginTop: 16 }}
+          message="Error loading diff"
+          description={error}
+          type="error"
+          showIcon
+        />
       </Container>
     )
   }

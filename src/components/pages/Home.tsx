@@ -148,10 +148,10 @@ const Home = () => {
   const deferredAppName = useDeferredValue(appName || DEFAULT_APP_NAME)
   const deferredAppPackage = useDeferredValue(appPackage)
 
-  const homepageUrl = process.env.PUBLIC_URL
+  const homepageUrl = import.meta.env.BASE_URL
 
   useEffect(() => {
-    if (process.env.NODE_ENV === 'production') {
+    if (import.meta.env.PROD) {
       ReactGA.initialize('UA-136307971-1')
       ReactGA.pageview('/')
     }
